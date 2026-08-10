@@ -42,16 +42,12 @@ public class WTTPackNStrap(
     ModHelper modHelper,
     LostOnDeathConfig lostOnDeathConfig) : IOnLoad
 {
-    private Assembly _assembly;
-    private Dictionary<MongoId, TemplateItem> _itemsDb;
-    private Dictionary<MongoId, Trader> _traderDb;
+    private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
+    private readonly Dictionary<MongoId, TemplateItem> _itemsDb = templateTable.Items;
+    private readonly Dictionary<MongoId, Trader> _traderDb = tradersTable;
 
     public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
-        _assembly = Assembly.GetExecutingAssembly();
-        _itemsDb = templateTable.Items;
-        _traderDb = tradersTable;
-
         CreateCustomItemsAndTemplates();
         ConfigureCustomItemsToTraders();
         AddToInventorySlots();
@@ -127,7 +123,7 @@ public class WTTPackNStrap(
     {
         var defaultInventory = _itemsDb["55d7217a4bdc2d86028b456d"];
 
-        foreach (var slot in defaultInventory.Properties.Slots)
+        foreach (var slot in defaultInventory.Properties?.Slots ?? [])
         {
             if (slot.Name == "SecuredContainer")
             {
