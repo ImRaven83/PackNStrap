@@ -14,7 +14,7 @@ namespace BeltSlot.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass3372), nameof(GClass3372.GetPrioritizedContainersForLoot));
+            return AccessTools.Method(typeof(InventoryEquipmentExtension), nameof(InventoryEquipmentExtension.GetPrioritizedContainersForLoot));
         }
 
         [PatchPrefix]
@@ -25,15 +25,15 @@ namespace BeltSlot.Patches
             Slot slotPockets = equipment.GetSlot(EquipmentSlot.Pockets);
             Slot slotSecuredContainer = equipment.GetSlot(EquipmentSlot.SecuredContainer);
             Slot slotArmBand = equipment.GetSlot(EquipmentSlot.ArmBand);
-            
-            VestItemClass vestItemClass = slotTacticalVest.ContainedItem as VestItemClass;
-            BackpackItemClass backpackItemClass = slotBackpack.ContainedItem as BackpackItemClass;
-            PocketsItemClass pocketsItemClass = slotPockets.ContainedItem as PocketsItemClass;
-            MobContainerItemClass mobContainerItemClass = slotSecuredContainer.ContainedItem as MobContainerItemClass;
+
+            Vest vestItemClass = slotTacticalVest.ContainedItem as Vest;
+            Backpack backpackItemClass = slotBackpack.ContainedItem as Backpack;
+            Pockets pocketsItemClass = slotPockets.ContainedItem as Pockets;
+            MobContainer mobContainerItemClass = slotSecuredContainer.ContainedItem as MobContainer;
 
             // Additional items for custom belt and tactical belt
             CustomBeltItemClass customBeltItemClass = slotArmBand.ContainedItem as CustomBeltItemClass;
-            VestItemClass tacticalBeltItemClass = slotArmBand.ContainedItem as VestItemClass;
+            Vest tacticalBeltItemClass = slotArmBand.ContainedItem as Vest;
 
             // Tactical Rig Location
             IEnumerable<EFT.InventoryLogic.IContainer> enumerable;
@@ -114,24 +114,24 @@ namespace BeltSlot.Patches
             IL_00DF:
             IEnumerable<EFT.InventoryLogic.IContainer> enumerable12 = enumerable11;
             // Belt slot containers come after the vest in looting priority
-            if (item is MagazineItemClass)
+            if (item is Magazine)
             {
                 // enumerable2 is chest rig, enumerable4 is backpack, enumerable6 is pockets,
                 // enumerable8 is secured container, enumerable10 is custom belt, enumerable12 is tactical belt
                 __result = enumerable2.Concat(enumerable10).Concat(enumerable12).Concat(enumerable6).Concat(enumerable4).Concat(enumerable8);
                 return false;
             }
-            if(item is AmmoItemClass)
+            if(item is Ammo)
             {
                 __result = enumerable10.Concat(enumerable12).Concat(enumerable2).Concat(enumerable6).Concat(enumerable4).Concat(enumerable8);
                 return false;
             }
-            if (item is MoneyItemClass)
+            if (item is Money)
             {
                 __result = enumerable8.Concat(enumerable4).Concat(enumerable2).Concat(enumerable10).Concat(enumerable12).Concat(enumerable6);
                 return false;
             }
-            if (item is ThrowWeapItemClass)
+            if (item is ThrowWeap)
             {
                 __result = enumerable6.Concat(enumerable10).Concat(enumerable12).Concat(enumerable2).Concat(enumerable4).Concat(enumerable8);
                 return false;

@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using EFT;
 using EFT.InventoryLogic;
 using PackNStrap.Core.Templates;
 namespace PackNStrap.Core.Items;
 
-public class CustomBeltItemClass : SearchableItemItemClass
+public class CustomBeltItemClass : SearchableItem
 {
     public CustomBeltItemClass(string id, CustomContainerTemplateClass template)
         : base(id, template)
@@ -33,6 +34,6 @@ public class CustomBeltItemClass : SearchableItemItemClass
             }
         }
     }
-    [GAttribute26]
+    [Component]
     public readonly TagComponent Tag;
 }

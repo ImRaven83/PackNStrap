@@ -12,7 +12,7 @@ namespace BeltSlot.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(GClass3372), nameof(GClass3372.GetPrioritizedContainersForLoot));
+            return AccessTools.Method(typeof(InventoryEquipmentExtension), nameof(InventoryEquipmentExtension.GetPrioritizedContainersForLoot));
         }
 
         [PatchPrefix]
@@ -24,13 +24,13 @@ namespace BeltSlot.Patches
             Slot slot4 = equipment.GetSlot(EquipmentSlot.SecuredContainer);
             Slot slot5 = equipment.GetSlot(EquipmentSlot.ArmBand);
             
-            VestItemClass vestItemClass = slot.ContainedItem as VestItemClass;
-            BackpackItemClass backpackItemClass = slot2.ContainedItem as BackpackItemClass;
-            PocketsItemClass pocketsItemClass = slot3.ContainedItem as PocketsItemClass;
-            MobContainerItemClass mobContainerItemClass = slot4.ContainedItem as MobContainerItemClass;
+            Vest vestItemClass = slot.ContainedItem as Vest;
+            Backpack backpackItemClass = slot2.ContainedItem as Backpack;
+            Pockets pocketsItemClass = slot3.ContainedItem as Pockets;
+            MobContainer mobContainerItemClass = slot4.ContainedItem as MobContainer;
 
             // Additional items for tactical belt
-            VestItemClass tacticalBeltItemClass = slot5.ContainedItem as VestItemClass;
+            Vest tacticalBeltItemClass = slot5.ContainedItem as Vest;
 
             // Tactical Rig Location
             IEnumerable<EFT.InventoryLogic.IContainer> enumerable;
@@ -98,24 +98,24 @@ namespace BeltSlot.Patches
             IL_00DF:
             IEnumerable<EFT.InventoryLogic.IContainer> enumerable12 = enumerable11;
             // Belt slot containers come after the vest in looting priority
-            if (item is MagazineItemClass)
+            if (item is Magazine)
             {
                 // enumerable2 is chestrig, enumerable4 is backpack, enumerable6 is pockets,
                 // enumerable8 is secured container, and enumerable12 is tactical belt
                 __result = enumerable2.Concat(enumerable12).Concat(enumerable6).Concat(enumerable4).Concat(enumerable8);
                 return false;
             }
-            if (item is AmmoItemClass)
+            if (item is Ammo)
             {
                 __result = enumerable12.Concat(enumerable2).Concat(enumerable6).Concat(enumerable4).Concat(enumerable8);
                 return false;
             }
-            if (item is MoneyItemClass)
+            if (item is Money)
             {
                 __result = enumerable8.Concat(enumerable4).Concat(enumerable2).Concat(enumerable12).Concat(enumerable6);
                 return false;
             }
-            if (item is ThrowWeapItemClass)
+            if (item is ThrowWeap)
             {
                 __result = enumerable6.Concat(enumerable12).Concat(enumerable2).Concat(enumerable4).Concat(enumerable8);
                 return false;

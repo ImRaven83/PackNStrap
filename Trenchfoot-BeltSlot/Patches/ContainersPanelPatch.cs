@@ -19,7 +19,7 @@ namespace BeltSlot.Patches
         protected override MethodBase GetTargetMethod()
         {
             defaultSlotTemplate = AccessTools.Field(typeof(ContainersPanel), "_defaultSlotTemplate");
-            return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.method_0));
+            return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.InstantiateSlotView));
         }
 
         [PatchPrefix]
@@ -76,6 +76,13 @@ namespace BeltSlot.Patches
         }
     }
 
+    // TODO(SPT 4.1.2): MainMenuControllerClass/method_48 were obfuscated identifiers from the
+    // pre-4.1.2 Assembly-CSharp build. Neither has an identifiable equivalent in the 4.1.2 client
+    // assembly (the class isn't a simple "drop the Class suffix" rename like most others, and no
+    // structural match could be found with confidence). Disabled pending manual identification of
+    // the correct target class/method against a real client, rather than guessing a Harmony patch
+    // target and risking a crash on mod load.
+    /*
     public class MainMenuControllerClassPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -92,6 +99,7 @@ namespace BeltSlot.Patches
             Plugin.Instance.SetInsuranceArmbandSlot();
         }
     }
+    */
 
     public class ComplexStashPanelPatch : ModulePatch
     {

@@ -44,23 +44,23 @@ public abstract class Common
         Slot armbandSlot = equipment.GetSlot(EquipmentSlot.ArmBand);
 
         // Check each slot for MagDumpPouches
-        FindMagDumpPouchInItem(tacticalVestSlot?.ContainedItem as VestItemClass);
-        FindMagDumpPouchInItem(pocketsSlot?.ContainedItem as PocketsItemClass);
+        FindMagDumpPouchInItem(tacticalVestSlot?.ContainedItem as Vest);
+        FindMagDumpPouchInItem(pocketsSlot?.ContainedItem as Pockets);
         if (backpackIncluded)
-            FindMagDumpPouchInItem(backpackSlot?.ContainedItem as BackpackItemClass);
+            FindMagDumpPouchInItem(backpackSlot?.ContainedItem as Backpack);
         FindMagDumpPouchInItem(armbandSlot?.ContainedItem as CustomBeltItemClass);
 
         // Cast magDumpPouches to CompoundItem and return
         return magDumpPouches;
     }
 
-    public static bool CanAcceptItems(StashGridClass grid)
+    public static bool CanAcceptItems(Grid grid)
     {
         Player player = PackNStrap.Player;
         // Example condition, replace with actual logic as needed
         if (player != null && player.HandsController != null && player.HandsController?.Item != null && player.HandsController?.Item?.GetCurrentMagazine() != null)
         {
-            return grid.CanAccept(player.HandsController?.Item?.GetCurrentMagazine()); // Assuming `CanAcceptItems` is a property or method on `StashGridClass`
+            return grid.CheckCompatibility(player.HandsController?.Item?.GetCurrentMagazine()); // Assuming `CanAcceptItems` is a property or method on `StashGridClass`
         }
         return false;
     }

@@ -37,7 +37,7 @@ namespace BeltSlot
         public InventoryEquipment inventoryEquipment;
         public InventoryScreen inventoryScreen;
         public CommonUI commonUI;
-        public CurrentScreenSingletonClass currentScreenSingletonClass = null;
+        public EftScreenManager currentScreenSingletonClass = null;
         internal static Plugin Instance { get; set; }
         internal ManualLogSource Log { get; set; }
         private static UI_Mappings uiMappings;
@@ -239,7 +239,7 @@ namespace BeltSlot
         {
             if (currentScreenSingletonClass == null)
             {
-                currentScreenSingletonClass = CurrentScreenSingletonClass.Instance;
+                currentScreenSingletonClass = EftScreenManager.Instance;
             }
 
             EEftScreenType _eScreenType = currentScreenSingletonClass.CurrentScreenController.ScreenType;
@@ -315,7 +315,7 @@ namespace BeltSlot
             new ContainersPanelPatch2().Enable();
             new ComplexStashPanelPatch().Enable();
             new ComplexStashPanelPatch2().Enable();
-            new MainMenuControllerClassPatch().Enable();
+            // MainMenuControllerClassPatch disabled: see TODO in ContainersPanelPatch.cs
             new ItemUiContextPatch().Enable();
             new EquipmentBuildsScreenPatch().Enable();
             new InventoryEquipmentPatch().Enable();

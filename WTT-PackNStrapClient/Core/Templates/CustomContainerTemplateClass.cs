@@ -1,8 +1,10 @@
+using EFT.InventoryLogic;
+
 namespace PackNStrap.Core.Templates;
 
-public class CustomContainerTemplateClass : SearchableItemTemplateClass, GInterface391
+public class CustomContainerTemplateClass : SearchableItemTemplate, IGridLayoutComponentTemplate
 {
-    string GInterface391.LayoutName => LayoutName;
+    string IGridLayoutComponentTemplate.LayoutName => LayoutName;
 
     public string LayoutName;
 }

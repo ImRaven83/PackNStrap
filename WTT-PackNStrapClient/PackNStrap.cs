@@ -24,7 +24,7 @@ namespace PackNStrap
         public static string PlayerNickname;
         private static GameUI _gameUI;
         private static Profile _playerProfile;
-        public static ISession BackEndSession;
+        public static IEftSession BackEndSession;
 
         public static readonly string PluginPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins");
 
