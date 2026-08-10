@@ -3,12 +3,11 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Mod;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using Range = SemanticVersioning.Range;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 using WTTPackNStrap.Models;
 using WTTPackNStrap.Patches;
@@ -16,46 +15,47 @@ using Path = System.IO.Path;
 
 namespace WTTPackNStrap;
 
-public record ModMetadata : AbstractModMetadata
+public record ModMetadata : IModMetadata
 {
-    public override string ModGuid { get; init; } = "com.wtt.packnstrap";
-    public override string Name { get; init; } = "WTT-PackNStrapServer";
-    public override string Author { get; init; } = "GrooveypenguinX";
-    public override List<string>? Contributors { get; init; } = null;
-    public override SemanticVersioning.Version Version { get; init; } = new(typeof(ModMetadata).Assembly.GetName().Version?.ToString(3));
-    public override Range SptVersion { get; init; } = new("~4.0.2");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, Range>? ModDependencies { get; init; } = new()
+    public string ModGuid { get; init; } = "com.wtt.packnstrap";
+    public string Name { get; init; } = "WTT-PackNStrapServer";
+    public string Author { get; init; } = "GrooveypenguinX";
+    public List<string>? Contributors { get; init; } = null;
+    public SemanticVersioning.Version Version { get; init; } = new(typeof(ModMetadata).Assembly.GetName().Version?.ToString(3));
+    public Range SptVersion { get; init; } = new("~4.1.0");
+    public bool HasPrepatcher { get; init; } = false;
+    public List<string>? Incompatibilities { get; init; }
+    public Dictionary<string, Range>? ModDependencies { get; init; } = new()
     {
-        { "com.wtt.commonlib", new Range("~2.0.0") }
+        { "com.wtt.commonlib", new Range("~3.0.0") }
     };
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; } = true;
-    public override string License { get; init; } = "MIT";
+    public string? Url { get; init; }
+    public string License { get; init; } = "MIT";
 }
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 2)]
 public class WTTPackNStrap(
     WTTServerCommonLib.WTTServerCommonLib wttCommon,
-    DatabaseService databaseService,
+    TemplateTable templateTable,
+    TradersTable tradersTable,
     JsonUtil jsonUtil,
     ModHelper modHelper,
-    ConfigServer configServer) : IOnLoad
+    LostOnDeathConfig lostOnDeathConfig) : IOnLoad
 {
     private Assembly _assembly;
     private Dictionary<MongoId, TemplateItem> _itemsDb;
     private Dictionary<MongoId, Trader> _traderDb;
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
         _assembly = Assembly.GetExecutingAssembly();
-        _itemsDb = databaseService.GetItems();
-        _traderDb = databaseService.GetTraders();
+        _itemsDb = templateTable.Items;
+        _traderDb = tradersTable;
 
         CreateCustomItemsAndTemplates();
         ConfigureCustomItemsToTraders();
         AddToInventorySlots();
-        
+
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(_assembly);
         wttCommon.CustomRigLayoutService.CreateRigLayouts(_assembly);
         await wttCommon.CustomLocaleService.CreateCustomLocales(_assembly);
@@ -91,7 +91,6 @@ public class WTTPackNStrap(
         }
         else
         {
-            var lostOnDeathConfig = configServer.GetConfig<LostOnDeathConfig>();
             lostOnDeathConfig.Equipment.ArmBand = true;
         }
 
