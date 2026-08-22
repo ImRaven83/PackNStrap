@@ -8,7 +8,6 @@ using EFT;
 using SPT.Reflection.Utils;
 using Comfort.Common;
 using PackNStrap.Helpers;
-using WTTClientCommonLib.Services;
 
 
 namespace PackNStrap
@@ -31,7 +30,6 @@ namespace PackNStrap
         internal void Awake()
         {
             Instance = this;
-            CustomTemplateIdToObjectService.AddNewTemplateIdToObjectMapping(NewTemplateIdToObjectIdClass.CustomMappings);
             new GetPrioritizedGridsForUnloadedObjectPatch().Enable();
             new MergeContainerWithChildrenPatch().Enable();
             new UnloadWeaponPatch().Enable();

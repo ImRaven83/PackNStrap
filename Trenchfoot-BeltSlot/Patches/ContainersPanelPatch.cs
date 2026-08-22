@@ -1,4 +1,6 @@
-﻿using Comfort.Common;
+﻿using BeltSlot.Helpers;
+using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
@@ -9,6 +11,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace BeltSlot.Patches
 {
@@ -58,21 +61,47 @@ namespace BeltSlot.Patches
 
     public class ContainersPanelPatch2 : ModulePatch
     {
+        private static FieldInfo slotViewsDictionary;
+
         protected override MethodBase GetTargetMethod()
         {
+            slotViewsDictionary = AccessTools.Field(typeof(ContainersPanel), "dictionary_0");
             return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.Show));
         }
-        [PatchPostfix]
-        static void Postfix()
-        {
-            if (Plugin.Instance.enableLogging)
-            {
-                Plugin.Instance.Log.LogInfo($"[Belt Slots] ContainersPanelPatch2.Postfix called");
-            }
-            //Plugin.Instance.armbandSlot = Plugin.Instance.inventoryEquipment.GetSlot(EquipmentSlot.ArmBand);
 
-            Plugin.Instance.isSavage = false;
-            Plugin.Instance.SetPlayerArmbandSlotOnOpen();
+        [PatchPostfix]
+        static void Postfix(ContainersPanel __instance, ItemContextAbstractClass parentContext, InventoryEquipment equipment, InventoryController inventoryController, SkillManager skills, InsuranceCompanyClass insurance, bool inRaid)
+        {
+            try
+            {
+                var beltSlot = BeltSlotLookup.GetBeltSlot(equipment);
+                if (beltSlot == null)
+                {
+                    return;
+                }
+
+                if (slotViewsDictionary?.GetValue(__instance) is not Dictionary<EquipmentSlot, SlotView> dictionary
+                    || !dictionary.TryGetValue(EquipmentSlot.ArmBand, out var slotView)
+                    || slotView == null)
+                {
+                    Plugin.Instance.Log.LogWarning($"[Belt Slots] Could not find the Belt UI placeholder.");
+                    return;
+                }
+
+                slotView.Close();
+                slotView.Show(beltSlot, parentContext, inventoryController, ItemUiContext.Instance, skills, insurance, true);
+                slotView.gameObject.SetActive(true);
+                Plugin.UiMappings.setBeltSlot_Settings(slotView.gameObject);
+
+                if (Plugin.Instance.enableLogging)
+                {
+                    Plugin.Instance.Log.LogInfo($"[Belt Slots] Bound Belt UI to independent Belt slot.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Instance.Log.LogError($"[Belt Slots] Failed to bind independent Belt slot: {ex}");
+            }
         }
     }
 

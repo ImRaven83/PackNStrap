@@ -1,11 +1,11 @@
-﻿using EFT.InventoryLogic;
+﻿using BeltSlot.Helpers;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using PackNStrap.Core.Items;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-//using PackNStrap.Helpers;
 
 namespace BeltSlot.Patches
 {
@@ -24,16 +24,16 @@ namespace BeltSlot.Patches
             Slot slotBackpack = equipment.GetSlot(EquipmentSlot.Backpack);
             Slot slotPockets = equipment.GetSlot(EquipmentSlot.Pockets);
             Slot slotSecuredContainer = equipment.GetSlot(EquipmentSlot.SecuredContainer);
-            Slot slotArmBand = equipment.GetSlot(EquipmentSlot.ArmBand);
-            
+            Slot beltSlot = BeltSlotLookup.GetBeltSlot(equipment);
+
             VestItemClass vestItemClass = slotTacticalVest.ContainedItem as VestItemClass;
             BackpackItemClass backpackItemClass = slotBackpack.ContainedItem as BackpackItemClass;
             PocketsItemClass pocketsItemClass = slotPockets.ContainedItem as PocketsItemClass;
             MobContainerItemClass mobContainerItemClass = slotSecuredContainer.ContainedItem as MobContainerItemClass;
 
             // Additional items for custom belt and tactical belt
-            CustomBeltItemClass customBeltItemClass = slotArmBand.ContainedItem as CustomBeltItemClass;
-            VestItemClass tacticalBeltItemClass = slotArmBand.ContainedItem as VestItemClass;
+            CustomBeltItemClass customBeltItemClass = beltSlot?.ContainedItem as CustomBeltItemClass;
+            VestItemClass tacticalBeltItemClass = beltSlot?.ContainedItem as VestItemClass;
 
             // Tactical Rig Location
             IEnumerable<EFT.InventoryLogic.IContainer> enumerable;

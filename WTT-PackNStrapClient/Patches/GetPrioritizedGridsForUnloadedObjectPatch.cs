@@ -24,19 +24,19 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
         Slot tacticalVestSlot = equipment.GetSlot(EquipmentSlot.TacticalVest);
         Slot pocketsSlot = equipment.GetSlot(EquipmentSlot.Pockets);
         Slot backpackSlot = equipment.GetSlot(EquipmentSlot.Backpack);
-        Slot armbandSlot = equipment.GetSlot(EquipmentSlot.ArmBand);
+        Slot beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
 
         // Handle contained items
         VestItemClass tacticalVestItem = tacticalVestSlot?.ContainedItem as VestItemClass;
         PocketsItemClass pocketsItem = pocketsSlot?.ContainedItem as PocketsItemClass;
         BackpackItemClass backpackItem = backpackSlot?.ContainedItem as BackpackItemClass;
-        CustomBeltItemClass armbandItem = armbandSlot?.ContainedItem as CustomBeltItemClass;
+        CustomBeltItemClass beltItem = beltSlot?.ContainedItem as CustomBeltItemClass;
 
         // Retrieve grids or empty arrays if items are null
         StashGridClass[] tacticalVestGrids = tacticalVestItem?.Grids ?? Array.Empty<StashGridClass>();
         StashGridClass[] pocketsGrids = pocketsItem?.Grids ?? Array.Empty<StashGridClass>();
         StashGridClass[] backpackGrids = backpackItem?.Grids ?? Array.Empty<StashGridClass>();
-        StashGridClass[] armbandGrids = armbandItem?.Grids ?? Array.Empty<StashGridClass>();
+        StashGridClass[] beltGrids = beltItem?.Grids ?? Array.Empty<StashGridClass>();
 
         // Find all instances of magDumpPouch
         List<CustomContainerItemClass> magDumpPouches = Common.GetMagDumpPouches(equipment, backpackIncluded);
@@ -60,8 +60,8 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
 #endif
         // Fall back to returning other grids if no valid MagDumpPouch grids
         __result = backpackIncluded
-            ? tacticalVestGrids.Concat(pocketsGrids).Concat(backpackGrids).Concat(armbandGrids)
-            : tacticalVestGrids.Concat(pocketsGrids).Concat(armbandGrids);
+            ? tacticalVestGrids.Concat(pocketsGrids).Concat(backpackGrids).Concat(beltGrids)
+            : tacticalVestGrids.Concat(pocketsGrids).Concat(beltGrids);
 
         return false; 
     }

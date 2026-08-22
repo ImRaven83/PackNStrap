@@ -1,10 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Services;
-using Range = SemanticVersioning.Range;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -15,24 +13,6 @@ using WTTPackNStrap.Patches;
 using Path = System.IO.Path;
 
 namespace WTTPackNStrap;
-
-public record ModMetadata : AbstractModMetadata
-{
-    public override string ModGuid { get; init; } = "com.wtt.packnstrap";
-    public override string Name { get; init; } = "WTT-PackNStrapServer";
-    public override string Author { get; init; } = "GrooveypenguinX";
-    public override List<string>? Contributors { get; init; } = null;
-    public override SemanticVersioning.Version Version { get; init; } = new(typeof(ModMetadata).Assembly.GetName().Version?.ToString(3));
-    public override Range SptVersion { get; init; } = new("~4.0.2");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, Range>? ModDependencies { get; init; } = new()
-    {
-        { "com.wtt.commonlib", new Range("~2.0.0") }
-    };
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; } = true;
-    public override string License { get; init; } = "MIT";
-}
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
 public class WTTPackNStrap(
@@ -52,10 +32,9 @@ public class WTTPackNStrap(
         _itemsDb = databaseService.GetItems();
         _traderDb = databaseService.GetTraders();
 
-        CreateCustomItemsAndTemplates();
-        ConfigureCustomItemsToTraders();
-        AddToInventorySlots();
-        
+        EnsureBeltSlot();
+
+        await wttCommon.CustomItemParentService.CreateCustomParents(_assembly, "db/CustomParents");
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(_assembly);
         wttCommon.CustomRigLayoutService.CreateRigLayouts(_assembly);
         await wttCommon.CustomLocaleService.CreateCustomLocales(_assembly);
@@ -124,68 +103,39 @@ public class WTTPackNStrap(
         }
     }
 
-    private void AddToInventorySlots()
+    // Adds a genuine "Belt" slot to the player's inventory root, cloned from the vanilla
+    // ArmBand slot definition, so belts no longer compete with armbands for the same slot.
+    private void EnsureBeltSlot()
     {
-        var defaultInventory = _itemsDb["55d7217a4bdc2d86028b456d"];
-
-        foreach (var slot in defaultInventory.Properties.Slots)
+        if (!_itemsDb.TryGetValue("55d7217a4bdc2d86028b456d", out var defaultInventory) || defaultInventory.Properties == null)
         {
-            if (slot.Name == "SecuredContainer")
-            {
-                slot.Properties?.Filters?.First().Filter?.Add("68154651f849fb4e7d816738");
-            }
-            if (slot.Name == "ArmBand")
-            {
-                slot.Properties?.Filters?.First().Filter?.Add("6815465859b8c6ff13f94026");
-            }
+            return;
         }
-    }
 
-    private void ConfigureCustomItemsToTraders()
-    {
-        // Belts to Ragman
-        _traderDb["5ac3b934156ae10c4430e83c"].Base.ItemsBuy?.Category.Add("6815465859b8c6ff13f94026");
-        // Cases and Secure Containers to Therapist
-        _traderDb["54cb57776803fa99248b456e"].Base.ItemsBuy?.Category.Add("680fd1dae5044e670a092e16");
-        _traderDb["54cb57776803fa99248b456e"].Base.ItemsBuy?.Category.Add("68154651f849fb4e7d816738");
+        var slots = defaultInventory.Properties.Slots?.ToList() ?? [];
+        if (slots.Any(slot => slot.Name == "Belt"))
+        {
+            return;
+        }
 
-    }
-
-    private void CreateCustomItemsAndTemplates()
-    {
-        _itemsDb["680fce2ec7b9b222270f074c"] = new TemplateItem()
+        var armBandSlot = slots.FirstOrDefault(slot => slot.Name == "ArmBand");
+        var beltSlot = new Slot
         {
-            Id = "680fce2ec7b9b222270f074c",
-            Name = "CustomContainerTemplate",
-            Parent = "566162e44bdc2d3f298b4573",
-            Type = "Node",
-            Properties = new TemplateItemProperties()
-        };
-        _itemsDb["680fd1dae5044e670a092e16"] = new TemplateItem()
-        {
-            Id = "680fd1dae5044e670a092e16",
-            Name = "CustomContainerItem",
-            Parent = "680fce2ec7b9b222270f074c",
-            Type = "Node",
-            Properties = new TemplateItemProperties()
-        };
-        _itemsDb["68154651f849fb4e7d816738"] = new TemplateItem()
-        {
-            Id = "68154651f849fb4e7d816738",
-            Name = "CustomSecureContainerItem",
-            Parent = "680fce2ec7b9b222270f074c",
-            Type = "Node",
-            Properties = new TemplateItemProperties()
-        };
-        _itemsDb["6815465859b8c6ff13f94026"] = new TemplateItem()
-        {
-            Id = "6815465859b8c6ff13f94026",
-            Name = "CustomBeltItem",
-            Parent = "680fce2ec7b9b222270f074c",
-            Type = "Node",
-            Properties = new TemplateItemProperties()
+            Name = "Belt",
+            Id = "6815465859b8c6ff13f94027",
+            Parent = armBandSlot?.Parent ?? "55d7217a4bdc2d86028b456d",
+            Required = false,
+            MaxCount = armBandSlot?.MaxCount ?? 1.0,
+            MergeSlotWithChildren = armBandSlot?.MergeSlotWithChildren,
+            Prototype = armBandSlot?.Prototype,
+            Properties = new SlotProperties
+            {
+                MaxStackCount = armBandSlot?.Properties?.MaxStackCount ?? 1.0,
+                Filters = [new SlotFilter { Filter = [(MongoId)"6815465859b8c6ff13f94026"] }]
+            }
         };
 
+        slots.Add(beltSlot);
+        defaultInventory.Properties.Slots = slots;
     }
 }
-

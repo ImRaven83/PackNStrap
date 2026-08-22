@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using EFT.InventoryLogic;
 using PackNStrap.Core.Templates;
+using WTTClientCommonLib.Attributes;
 namespace PackNStrap.Core.Items;
 
+[CustomParent("68154651f849fb4e7d816738", typeof(CustomSecureContainerClass), typeof(CustomContainerTemplateClass))]
 public class CustomSecureContainerClass : SearchableItemItemClass
 {
     public CustomSecureContainerClass(string id, CustomContainerTemplateClass template)

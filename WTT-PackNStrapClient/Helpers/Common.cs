@@ -41,14 +41,14 @@ public abstract class Common
         Slot tacticalVestSlot = equipment.GetSlot(EquipmentSlot.TacticalVest);
         Slot pocketsSlot = equipment.GetSlot(EquipmentSlot.Pockets);
         Slot backpackSlot = equipment.GetSlot(EquipmentSlot.Backpack);
-        Slot armbandSlot = equipment.GetSlot(EquipmentSlot.ArmBand);
+        Slot beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
 
         // Check each slot for MagDumpPouches
         FindMagDumpPouchInItem(tacticalVestSlot?.ContainedItem as VestItemClass);
         FindMagDumpPouchInItem(pocketsSlot?.ContainedItem as PocketsItemClass);
         if (backpackIncluded)
             FindMagDumpPouchInItem(backpackSlot?.ContainedItem as BackpackItemClass);
-        FindMagDumpPouchInItem(armbandSlot?.ContainedItem as CustomBeltItemClass);
+        FindMagDumpPouchInItem(beltSlot?.ContainedItem as CustomBeltItemClass);
 
         // Cast magDumpPouches to CompoundItem and return
         return magDumpPouches;

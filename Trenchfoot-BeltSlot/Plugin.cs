@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace BeltSlot
 {
-    [BepInPlugin("com.trenchfoot.beltslot", "Trenchfoot-BeltSlot", "2.0.4")]
+    [BepInPlugin("com.trenchfoot.beltslot", "Trenchfoot-BeltSlot", "2.0.5")]
     [BepInDependency("com.SPT.core", "4.0.4")]
     [BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
@@ -284,21 +284,10 @@ namespace BeltSlot
 
         void SetEquipmentSlots()
         {
-            switch (Settings.BeltSlotLocation.Value)
-            {
-                case BeltSlotLocationOption.AbovePockets:
-                    // Set the equipment slots to the aboveEquipmentSlots array
-                    typeof(ContainersPanel)
-                        .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
-                        .SetValue(null, aboveEquipmentSlots);
-                    break;
-                case BeltSlotLocationOption.BelowPockets:
-                    // Set the equipment slots to the belowEquipmentSlots array
-                    typeof(ContainersPanel)
-                        .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
-                        .SetValue(null, belowEquipmentSlots);
-                    break;
-            }
+            // Belt now lives in its own independent slot, so it always renders below Pockets.
+            typeof(ContainersPanel)
+                .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
+                .SetValue(null, belowEquipmentSlots);
         }
         #endregion
 
@@ -313,14 +302,6 @@ namespace BeltSlot
             SetEquipmentSlots();
             new ContainersPanelPatch().Enable();
             new ContainersPanelPatch2().Enable();
-            new ComplexStashPanelPatch().Enable();
-            new ComplexStashPanelPatch2().Enable();
-            new MainMenuControllerClassPatch().Enable();
-            new ItemUiContextPatch().Enable();
-            new EquipmentBuildsScreenPatch().Enable();
-            new InventoryEquipmentPatch().Enable();
-            new InventoryScreenPatch().Enable();
-            new ItemViewPatch().Enable();
 
             // Enables the correct patch based on if PackNStrap is installed or not
             if (packNStrapInstalled)

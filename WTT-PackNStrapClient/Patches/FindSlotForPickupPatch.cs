@@ -2,6 +2,7 @@ using System.Reflection;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using PackNStrap.Core.Items;
+using PackNStrap.Helpers;
 using SPT.Reflection.Patching;
 
 namespace PackNStrap.Patches
@@ -11,7 +12,7 @@ namespace PackNStrap.Patches
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(
-                typeof(GClass3373), 
+                typeof(GClass3373),
                 nameof(GClass3373.FindSlotToPickUp),
                 new[] { typeof(InventoryEquipment), typeof(Item) }
             );
@@ -29,20 +30,16 @@ namespace PackNStrap.Patches
                 return;
             }
 
-            foreach (var slot in GClass3373.EquipmentSlot_8) // ArmBand slots
+            var beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
+            if (beltSlot == null || beltSlot.Deleted || !beltSlot.CheckCompatibility(item))
             {
-                var equipmentSlot = equipment.GetSlot(slot);
-                if (equipmentSlot.Deleted || !equipmentSlot.CheckCompatibility(item))
-                {
-                    continue;
-                }
+                return;
+            }
 
-                var address = equipmentSlot.FindLocationForItem(item, out _);
-                if (address != null)
-                {
-                    __result = address;
-                    return;
-                }
+            var address = beltSlot.FindLocationForItem(item, out _);
+            if (address != null)
+            {
+                __result = address;
             }
         }
     }
