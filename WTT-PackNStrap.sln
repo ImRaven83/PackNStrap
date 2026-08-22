@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTT-PackNStrapClient", "WTT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trenchfoot-BeltSlot", "Trenchfoot-BeltSlot\Trenchfoot-BeltSlot.csproj", "{DE403D6D-5B1C-4605-94CA-A54706CB491B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackNStrap-BeltPrepatch", "PackNStrap-BeltPrepatch\PackNStrap-BeltPrepatch.csproj", "{B8810F85-78E6-4B87-8478-9F6C8C180150}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackNStrap-WTT-ReflectionGuard", "PackNStrap-WTT-ReflectionGuard\PackNStrap-WTT-ReflectionGuard.csproj", "{2F58B696-62C0-4B45-A933-6920418F5A55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{DE403D6D-5B1C-4605-94CA-A54706CB491B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE403D6D-5B1C-4605-94CA-A54706CB491B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE403D6D-5B1C-4605-94CA-A54706CB491B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8810F85-78E6-4B87-8478-9F6C8C180150}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8810F85-78E6-4B87-8478-9F6C8C180150}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8810F85-78E6-4B87-8478-9F6C8C180150}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8810F85-78E6-4B87-8478-9F6C8C180150}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F58B696-62C0-4B45-A933-6920418F5A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F58B696-62C0-4B45-A933-6920418F5A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F58B696-62C0-4B45-A933-6920418F5A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F58B696-62C0-4B45-A933-6920418F5A55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

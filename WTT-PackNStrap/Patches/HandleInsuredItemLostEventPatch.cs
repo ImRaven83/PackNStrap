@@ -33,16 +33,16 @@ public class HandleInsuredItemLostEventPatch : AbstractPatch
 
         var inventoryItems = preRaidPmcProfile.Inventory?.Items ?? [];
         
-        var armBandItem = inventoryItems.FirstOrDefault(i => i.SlotId == "ArmBand");
-        if (armBandItem == null)
+        var beltItem = inventoryItems.FirstOrDefault(i => i.SlotId == "Belt");
+        if (beltItem == null)
         {
             return;
         }
 
-        var armBandDescendants = GetAllDescendants(armBandItem.Id, inventoryItems).ToList();
-        
+        var beltDescendants = GetAllDescendants(beltItem.Id, inventoryItems).ToList();
+
         request.LostInsuredItems = request.LostInsuredItems
-            .Where(item => !armBandDescendants.Contains(item.Id))
+            .Where(item => !beltDescendants.Contains(item.Id))
             .ToList();
     }
     
