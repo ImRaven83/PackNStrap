@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+	  <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1</AssetTargetFallback>
 	  <AssemblyName>WTT-PackNStrap</AssemblyName>
 	  <Description>WTT PackNStrap custom rig loader</Description>
 	  <Version>2.0.5</Version>
@@ -86,7 +87,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="WTT-ClientCommonLib" Version="2.0.24" />
+	  <PackageReference Include="WTT-ClientCommonLib" Version="2.0.20" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
