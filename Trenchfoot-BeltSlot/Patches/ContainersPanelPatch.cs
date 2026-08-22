@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
+using EFT.UI.Insurance;
 using EFT.UI.Screens;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -22,7 +23,7 @@ namespace BeltSlot.Patches
         protected override MethodBase GetTargetMethod()
         {
             defaultSlotTemplate = AccessTools.Field(typeof(ContainersPanel), "_defaultSlotTemplate");
-            return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.method_0));
+            return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.InstantiateSlotView));
         }
 
         [PatchPrefix]
@@ -65,12 +66,12 @@ namespace BeltSlot.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            slotViewsDictionary = AccessTools.Field(typeof(ContainersPanel), "dictionary_0");
+            slotViewsDictionary = AccessTools.Field(typeof(ContainersPanel), "_slotViews");
             return AccessTools.Method(typeof(ContainersPanel), nameof(ContainersPanel.Show));
         }
 
         [PatchPostfix]
-        static void Postfix(ContainersPanel __instance, ItemContextAbstractClass parentContext, InventoryEquipment equipment, InventoryController inventoryController, SkillManager skills, InsuranceCompanyClass insurance, bool inRaid)
+        static void Postfix(ContainersPanel __instance, ItemContext parentContext, InventoryEquipment equipment, InventoryController inventoryController, SkillManager skills, InsuranceCompany insurance, bool inRaid)
         {
             try
             {
@@ -105,6 +106,14 @@ namespace BeltSlot.Patches
         }
     }
 
+    // TODO(SPT 4.1.3): MainMenuControllerClass/method_48 were obfuscated identifiers from the
+    // pre-4.1.x Assembly-CSharp build. Neither has an identifiable equivalent in the 4.1.3 client
+    // assembly (not a simple "drop the Class suffix" rename like most others, and no structural
+    // match could be found with confidence). Disabled pending manual identification of the correct
+    // target class/method against a real client, rather than guessing a Harmony patch target and
+    // risking a crash on mod load. Not enabled from Plugin.Awake() regardless (dead code, matching
+    // the rest of the pre-independent-slot icon-toggle system).
+    /*
     public class MainMenuControllerClassPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -121,6 +130,7 @@ namespace BeltSlot.Patches
             Plugin.Instance.SetInsuranceArmbandSlot();
         }
     }
+    */
 
     public class ComplexStashPanelPatch : ModulePatch
     {

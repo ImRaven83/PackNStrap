@@ -13,7 +13,7 @@ using PackNStrap.Helpers;
 namespace PackNStrap
 {
     [BepInDependency("com.cj.useFromAnywhere", "1.3.2")]
-    [BepInPlugin("com.wtt.packnstrap", "WTT-PackNStrap", "2.0.5")]
+    [BepInPlugin("com.wtt.packnstrap", "WTT-PackNStrap", "2.0.6")]
 
     internal class PackNStrap : BaseUnityPlugin
     {
@@ -23,7 +23,7 @@ namespace PackNStrap
         public static string PlayerNickname;
         private static GameUI _gameUI;
         private static Profile _playerProfile;
-        public static ISession BackEndSession;
+        public static IEftSession BackEndSession;
 
         public static readonly string PluginPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins");
 

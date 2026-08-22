@@ -5,7 +5,7 @@
 	  <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1</AssetTargetFallback>
 	  <AssemblyName>WTT-PackNStrap</AssemblyName>
 	  <Description>WTT PackNStrap custom rig loader</Description>
-	  <Version>2.0.5</Version>
+	  <Version>2.0.6</Version>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <LangVersion>latest</LangVersion>
 	  <Configurations>Debug;Release;UNITY_EDITOR</Configurations>
@@ -87,7 +87,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="WTT-ClientCommonLib" Version="2.0.20" />
+	  <PackageReference Include="WTT-ClientCommonLib" Version="3.0.4" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

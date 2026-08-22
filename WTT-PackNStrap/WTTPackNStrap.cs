@@ -2,11 +2,10 @@ using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 using WTTPackNStrap.Models;
 using WTTPackNStrap.Patches;
@@ -14,24 +13,21 @@ using Path = System.IO.Path;
 
 namespace WTTPackNStrap;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 2)]
 public class WTTPackNStrap(
     WTTServerCommonLib.WTTServerCommonLib wttCommon,
-    DatabaseService databaseService,
+    TemplateTable templateTable,
+    TradersTable tradersTable,
     JsonUtil jsonUtil,
     ModHelper modHelper,
-    ConfigServer configServer) : IOnLoad
+    LostOnDeathConfig lostOnDeathConfig) : IOnLoad
 {
-    private Assembly _assembly;
-    private Dictionary<MongoId, TemplateItem> _itemsDb;
-    private Dictionary<MongoId, Trader> _traderDb;
+    private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
+    private readonly Dictionary<MongoId, TemplateItem> _itemsDb = templateTable.Items;
+    private readonly Dictionary<MongoId, Trader> _traderDb = tradersTable;
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
-        _assembly = Assembly.GetExecutingAssembly();
-        _itemsDb = databaseService.GetItems();
-        _traderDb = databaseService.GetTraders();
-
         EnsureBeltSlot();
 
         await wttCommon.CustomItemParentService.CreateCustomParents(_assembly, "db/CustomParents");
@@ -70,7 +66,6 @@ public class WTTPackNStrap(
         }
         else
         {
-            var lostOnDeathConfig = configServer.GetConfig<LostOnDeathConfig>();
             lostOnDeathConfig.Equipment.ArmBand = true;
         }
 

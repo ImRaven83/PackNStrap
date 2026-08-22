@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Diz.LanguageExtensions;
+using Diz.Utils;
+using EFT;
 using EFT.Communications;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -23,7 +26,7 @@ internal class UnloadWeaponPatch : ModulePatch
     [PatchPrefix]
     public static bool UnloadWeaponPrefix(ItemUiContext __instance, ref Weapon weapon, ref Task __result)
     {
-        if (!GClass2340.InRaid)
+        if (!InGameStatus.InRaid)
         {
             return true;
         }
@@ -46,24 +49,24 @@ internal class UnloadWeaponPatch : ModulePatch
 
     private static async Task CustomUnloadWeapon(ItemUiContext __instance, Weapon weapon)
     {
-        TraderControllerClass traderControllerClass = (TraderControllerClass)
+        ItemController traderControllerClass = (ItemController)
             AccessTools.Field(typeof(ItemUiContext),
-                    "traderControllerClass")
+                    "_itemController")
                 .GetValue(__instance);
         CompoundItem[] compoundItem_0 = (CompoundItem[])
             AccessTools.Field(typeof(ItemUiContext),
-                    "compoundItem_0")
+                    "_rightPanelItem")
                 .GetValue(__instance);
         if (!weapon.IsUnderBarrelDeviceActive)
         {
-            MagazineItemClass currentMagazine = weapon.GetCurrentMagazine();
+            Magazine currentMagazine = weapon.GetCurrentMagazine();
             if (currentMagazine != null)
             {
-                if (!__instance.method_16(weapon))
+                if (!__instance.TryExamineMalfunction(weapon))
                 {
                     var inventoryEquipment = (InventoryEquipment)
                         AccessTools.Field(typeof(ItemUiContext),
-                                "inventoryEquipment_0")
+                                "_equipment")
                             .GetValue(__instance);
                     bool flag;
                     if (!(flag = inventoryEquipment.Contains(currentMagazine)) && compoundItem_0 == null)
@@ -109,17 +112,17 @@ internal class UnloadWeaponPatch : ModulePatch
                         Console.WriteLine("[AFTER] Final search order:");
                         LogContainers(enumerable3);
 #endif
-                        GStruct154<GInterface424> gstruct = InteractionsHandlerClass.QuickFindAppropriatePlace(currentMagazine, traderControllerClass, enumerable3, InteractionsHandlerClass.EMoveItemOrder.PrioritizeTargetsOrder, true);
+                        OperationResult<IItemOperationResult> gstruct = ItemManipulator.QuickFindAppropriatePlace(currentMagazine, traderControllerClass, enumerable3, ItemManipulator.EMoveItemOrder.PrioritizeTargetsOrder, true);
                         bool flag2;
                         if (flag2 = gstruct.Succeeded)
                         {
-                            flag2 = (await ItemUiContext.smethod_0(traderControllerClass, currentMagazine, gstruct)).Succeed;
+                            flag2 = (await ItemUiContext.RunWithSound(traderControllerClass, currentMagazine, gstruct)).Succeed;
                         }
                         if (!flag2)
                         {
-                            if (!GClass2340.InRaid)
+                            if (!InGameStatus.InRaid)
                             {
-                                NotificationManagerClass.DisplayWarningNotification("Can't find a place for item".Localized());
+                                NotificationManager.DisplayWarningNotification("Can't find a place for item".Localized());
                             }
                             else if (traderControllerClass.CanThrow(currentMagazine))
                             {

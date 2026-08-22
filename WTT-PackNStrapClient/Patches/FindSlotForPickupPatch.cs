@@ -12,8 +12,8 @@ namespace PackNStrap.Patches
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(
-                typeof(GClass3373),
-                nameof(GClass3373.FindSlotToPickUp),
+                typeof(InventoryExtension),
+                nameof(InventoryExtension.FindSlotToPickUp),
                 new[] { typeof(InventoryEquipment), typeof(Item) }
             );
         }
@@ -21,7 +21,6 @@ namespace PackNStrap.Patches
         [PatchPostfix]
         public static void Postfix(
             ref ItemAddress __result,
-            GClass3373 __instance,
             InventoryEquipment equipment,
             Item item)
         {

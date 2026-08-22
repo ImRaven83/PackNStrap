@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace BeltSlot
 {
-    [BepInPlugin("com.trenchfoot.beltslot", "Trenchfoot-BeltSlot", "2.0.5")]
+    [BepInPlugin("com.trenchfoot.beltslot", "Trenchfoot-BeltSlot", "2.0.6")]
     [BepInDependency("com.SPT.core", "4.0.4")]
     [BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
@@ -37,7 +37,7 @@ namespace BeltSlot
         public InventoryEquipment inventoryEquipment;
         public InventoryScreen inventoryScreen;
         public CommonUI commonUI;
-        public CurrentScreenSingletonClass currentScreenSingletonClass = null;
+        public EftScreenManager currentScreenSingletonClass = null;
         internal static Plugin Instance { get; set; }
         internal ManualLogSource Log { get; set; }
         private static UI_Mappings uiMappings;
@@ -239,7 +239,7 @@ namespace BeltSlot
         {
             if (currentScreenSingletonClass == null)
             {
-                currentScreenSingletonClass = CurrentScreenSingletonClass.Instance;
+                currentScreenSingletonClass = EftScreenManager.Instance;
             }
 
             EEftScreenType _eScreenType = currentScreenSingletonClass.CurrentScreenController.ScreenType;
@@ -286,7 +286,7 @@ namespace BeltSlot
         {
             // Belt now lives in its own independent slot, so it always renders below Pockets.
             typeof(ContainersPanel)
-                .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetField("_slotNames", BindingFlags.Static | BindingFlags.NonPublic)
                 .SetValue(null, belowEquipmentSlots);
         }
         #endregion
