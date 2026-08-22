@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net472</TargetFramework>
+        <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1</AssetTargetFallback>
         <Description>Trenchfoot's custom belt slot!</Description>
         <Version>2.0.5</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

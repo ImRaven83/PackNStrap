@@ -19,7 +19,7 @@ namespace PackNStrap.Patches
         {
             if (__instance?.ID == "Belt")
             {
-                __result = EParentMergeType.None;
+                __result = EParentMergeType.InheritFromItem;
             }
         }
     }
