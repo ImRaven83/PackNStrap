@@ -27,6 +27,8 @@ public static class BeltIds
         "68170b2cb595bf820b60571a",
         "681baec29eb1732a417bd7dd",
         "681bb00c7fecf6d490b2fb3c",
-        "681bcd300480896883303f71"
+        "681bcd300480896883303f71",
+        "69352d5c409abe93d29321e4",
+        "69364a368a4b47eeaf9ba4a3"
     };
 }

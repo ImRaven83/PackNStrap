@@ -5,7 +5,7 @@
 	  <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1</AssetTargetFallback>
 	  <AssemblyName>WTT-PackNStrap</AssemblyName>
 	  <Description>WTT PackNStrap custom rig loader</Description>
-	  <Version>2.0.6</Version>
+	  <Version>2.0.7</Version>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <LangVersion>latest</LangVersion>
 	  <Configurations>Debug;Release;UNITY_EDITOR</Configurations>
