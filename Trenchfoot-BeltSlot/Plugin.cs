@@ -289,13 +289,13 @@ namespace BeltSlot
                 case BeltSlotLocationOption.AbovePockets:
                     // Set the equipment slots to the aboveEquipmentSlots array
                     typeof(ContainersPanel)
-                        .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
+                        .GetField("_slotNames", BindingFlags.Static | BindingFlags.NonPublic)
                         .SetValue(null, aboveEquipmentSlots);
                     break;
                 case BeltSlotLocationOption.BelowPockets:
                     // Set the equipment slots to the belowEquipmentSlots array
                     typeof(ContainersPanel)
-                        .GetField("equipmentSlot_0", BindingFlags.Static | BindingFlags.NonPublic)
+                        .GetField("_slotNames", BindingFlags.Static | BindingFlags.NonPublic)
                         .SetValue(null, belowEquipmentSlots);
                     break;
             }
