@@ -11,7 +11,7 @@ public record ModMetadata : IModMetadata
     public List<string>? Contributors { get; init; } = null;
     public SemanticVersioning.Version Version { get; init; } = new(typeof(ModMetadata).Assembly.GetName().Version?.ToString(3));
     public Range SptVersion { get; init; } = new("~4.1.0");
-    public bool HasPrepatcher { get; init; } = true;
+    public bool HasPrepatcher { get; init; } = false;
     public List<string>? Incompatibilities { get; init; }
     public Dictionary<string, Range>? ModDependencies { get; init; } = new()
     {
