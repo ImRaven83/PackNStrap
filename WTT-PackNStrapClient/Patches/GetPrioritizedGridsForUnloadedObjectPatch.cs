@@ -23,17 +23,17 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
         Slot tacticalVestSlot = equipment.GetSlot(EquipmentSlot.TacticalVest);
         Slot pocketsSlot = equipment.GetSlot(EquipmentSlot.Pockets);
         Slot backpackSlot = equipment.GetSlot(EquipmentSlot.Backpack);
-        Slot armbandSlot = equipment.GetSlot(EquipmentSlot.ArmBand);
+        Slot beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
 
         Vest tacticalVestItem = tacticalVestSlot?.ContainedItem as Vest;
         Pockets pocketsItem = pocketsSlot?.ContainedItem as Pockets;
         Backpack backpackItem = backpackSlot?.ContainedItem as Backpack;
-        CustomBeltItemClass armbandItem = armbandSlot?.ContainedItem as CustomBeltItemClass;
+        CustomBeltItemClass beltItem = beltSlot?.ContainedItem as CustomBeltItemClass;
 
         Grid[] tacticalVestGrids = tacticalVestItem?.Grids ?? Array.Empty<Grid>();
         Grid[] pocketsGrids = pocketsItem?.Grids ?? Array.Empty<Grid>();
         Grid[] backpackGrids = backpackItem?.Grids ?? Array.Empty<Grid>();
-        Grid[] armbandGrids = armbandItem?.Grids ?? Array.Empty<Grid>();
+        Grid[] beltGrids = beltItem?.Grids ?? Array.Empty<Grid>();
 
         List<CustomContainerItemClass> magDumpPouches = Common.GetMagDumpPouches(equipment, backpackIncluded);
 
@@ -54,8 +54,8 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
         Console.WriteLine("No valid MagDumpPouch grids found.");
 #endif
         __result = backpackIncluded
-            ? tacticalVestGrids.Concat(pocketsGrids).Concat(backpackGrids).Concat(armbandGrids)
-            : tacticalVestGrids.Concat(pocketsGrids).Concat(armbandGrids);
+            ? tacticalVestGrids.Concat(pocketsGrids).Concat(backpackGrids).Concat(beltGrids)
+            : tacticalVestGrids.Concat(pocketsGrids).Concat(beltGrids);
 
         return false; 
     }

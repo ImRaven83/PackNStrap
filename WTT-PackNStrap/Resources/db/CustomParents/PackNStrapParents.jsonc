@@ -59,7 +59,7 @@
     "addToTraderBuyLists": true,
     "traders": [ "ragman" ],
     "addToInventorySlots": true,
-    "inventorySlots": [ "ArmBand" ],
+    "inventorySlots": [ "Belt" ],
     "addToContainerFilters": true,
 
     "containers": [

@@ -21,25 +21,25 @@ public class IsItemKeptAfterDeathPatch : AbstractPatch
     [PatchPostfix]
     public static void Postfix(PmcData pmcData, Item itemToCheck, ref bool __result)
     {
-        if (!__result && IsItemInArmBand(pmcData, itemToCheck))
+        if (!__result && IsItemInBelt(pmcData, itemToCheck))
         {
             __result = true;
         }
     }
 
-    private static bool IsItemInArmBand(PmcData pmcData, Item item)
+    private static bool IsItemInBelt(PmcData pmcData, Item item)
     {
         var inventoryItems = pmcData.Inventory?.Items ?? [];
-    
-        // Find the ArmBand container
-        var armBandItem = inventoryItems.FirstOrDefault(i => i.SlotId == "ArmBand");
-        if (armBandItem == null)
+
+        // Find the independent Belt slot
+        var beltItem = inventoryItems.FirstOrDefault(i => i.SlotId == "Belt");
+        if (beltItem == null)
         {
             return false;
         }
 
-        // Check if item is the ArmBand itself or a child of it
-        return item.Id == armBandItem.Id || 
-               inventoryItems.GetItemWithChildren(armBandItem.Id).Any(i => i.Id == item.Id);
+        // Check if item is the belt itself or a child of it
+        return item.Id == beltItem.Id ||
+               inventoryItems.GetItemWithChildren(beltItem.Id).Any(i => i.Id == item.Id);
     }
 }

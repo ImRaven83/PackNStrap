@@ -2,6 +2,7 @@ using System.Reflection;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using PackNStrap.Core.Items;
+using PackNStrap.Helpers;
 using SPT.Reflection.Patching;
 
 namespace PackNStrap.Patches
@@ -28,20 +29,16 @@ namespace PackNStrap.Patches
                 return;
             }
 
-            foreach (var slot in InventoryExtension.equipmentSlot_8) // ArmBand slots
+            var beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
+            if (beltSlot == null || beltSlot.Deleted || !beltSlot.CheckCompatibility(item))
             {
-                var equipmentSlot = equipment.GetSlot(slot);
-                if (equipmentSlot.Deleted || !equipmentSlot.CheckCompatibility(item))
-                {
-                    continue;
-                }
+                return;
+            }
 
-                var address = equipmentSlot.FindLocationForItem(item, out _);
-                if (address != null)
-                {
-                    __result = address;
-                    return;
-                }
+            var address = beltSlot.FindLocationForItem(item, out _);
+            if (address != null)
+            {
+                __result = address;
             }
         }
     }

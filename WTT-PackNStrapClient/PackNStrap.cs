@@ -1,21 +1,17 @@
 #if !UNITY_EDITOR
 using BepInEx;
-using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using EFT.UI;
-using PackNStrap.Helpers;
 using PackNStrap.Patches;
 using SPT.Reflection.Utils;
 using System;
 using System.IO;
-using System.Reflection;
-using WTTClientCommonLib.Services;
 
 
 namespace PackNStrap
 {
+    [BepInDependency("com.cj.useFromAnywhere", "1.3.2")]
     [BepInPlugin(
     PluginConstants.Guid,
     PluginConstants.Name,
@@ -32,82 +28,15 @@ namespace PackNStrap
         public static IEftSession BackEndSession;
         public static readonly string PluginPath = Path.Combine(Environment.CurrentDirectory, "BepInEx", "plugins");
 
-
-        #region Proper Armband Slots Info
-        public FieldInfo FastAccessSlots { get; set; }
-
-        private static readonly EquipmentSlot[] NewFastAccessSlots =
-        [
-            EquipmentSlot.Pockets,
-            EquipmentSlot.TacticalVest,
-            EquipmentSlot.ArmBand
-        ];
-        public FieldInfo BindAvailableSlots { get; set; }
-
-        public static readonly EquipmentSlot[] NewBindAvailableSlots =
-        [
-            EquipmentSlot.FirstPrimaryWeapon,
-            EquipmentSlot.SecondPrimaryWeapon,
-            EquipmentSlot.Holster,
-            EquipmentSlot.Scabbard,
-            EquipmentSlot.Pockets,
-            EquipmentSlot.TacticalVest,
-            EquipmentSlot.ArmBand
-        ];
-
-
-        private FieldInfo _traderServicesEligibleSlots;
-
-        private static readonly EquipmentSlot[] NewTraderServicesEligibleSlots =
-        [
-            EquipmentSlot.Backpack,
-            EquipmentSlot.TacticalVest,
-            EquipmentSlot.Pockets,
-            EquipmentSlot.SecuredContainer,
-            EquipmentSlot.ArmBand
-        ];
-
-
-        #endregion
-
-
-
-
         internal void Awake()
         {
             Instance = this;
-
-
-
 
             new GetPrioritizedGridsForUnloadedObjectPatch().Enable();
             new MergeContainerWithChildrenPatch().Enable();
             new UnloadWeaponPatch().Enable();
             new FindSlotForPickupPatch().Enable();
             new RegisterCustomItemTypesPatch().Enable();
-
-            var useItemsInstalled = Chainloader.PluginInfos.ContainsKey("com.cj.useFromAnywhere");
-
-            if (!useItemsInstalled)
-            {
-
-                #region Proper Belt Fast Access
-                FastAccessSlots = FastAccessSlots ?? typeof(Inventory).GetField("FastAccessSlots");
-                FastAccessSlots?.SetValue(FastAccessSlots, NewFastAccessSlots);
-
-                BindAvailableSlots = BindAvailableSlots ?? typeof(Inventory).GetField("BindAvailableSlotsExtended");
-                BindAvailableSlots?.SetValue(BindAvailableSlots, NewBindAvailableSlots);
-
-                _traderServicesEligibleSlots = _traderServicesEligibleSlots ?? typeof(InventoryEquipment).GetField("TraderServicesEligibleSlots");
-                _traderServicesEligibleSlots?.SetValue(_traderServicesEligibleSlots, NewTraderServicesEligibleSlots);
-                #endregion
-                new ContainerSlotsPatch().Enable();
-                new PaymentSlotsPatch().Enable();
-                new GrenadeThrowingSlotsPatch().Enable();
-                new IsAtBindablePlacePatch().Enable();
-                new IsAtReachablePlacePatch().Enable();
-                new GetThrowablePriorityGrenadesListPatch().Enable();
-            }
         }
 
         internal void Update()

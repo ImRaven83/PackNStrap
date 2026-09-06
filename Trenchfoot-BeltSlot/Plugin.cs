@@ -20,7 +20,7 @@ namespace BeltSlot;
     PluginConstants.Guid,
     PluginConstants.Name,
     PluginConstants.Version)]
-[BepInDependency("com.wtt.packnstrap")]
+[BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class Plugin : BaseUnityPlugin
 {
     private static readonly EquipmentSlot[] SlotsAbovePockets =
@@ -64,10 +64,14 @@ public sealed class Plugin : BaseUnityPlugin
     private string? _lootArmbandItemId;
     private string? _scavTransferArmbandItemId;
 
+    private bool _packNStrapInstalled;
+
     private void Awake()
     {
         Instance = this;
         Log = Logger;
+
+        _packNStrapInstalled = Chainloader.PluginInfos.ContainsKey("com.wtt.packnstrap");
 
         Settings.Init(Config);
         UiMappings = new UI_Mappings();
@@ -79,15 +83,17 @@ public sealed class Plugin : BaseUnityPlugin
     {
         new ContainersPanelPatch().Enable();
         new ContainersPanelPatch2().Enable();
-        new ComplexStashPanelPatch().Enable();
-        new ComplexStashPanelPatch2().Enable();
-        new MainMenuShowOperationPatch().Enable();
-        new ItemUiContextPatch().Enable();
-        new EquipmentBuildsScreenPatch().Enable();
-        new InventoryEquipmentPatch().Enable();
-        new InventoryScreenPatch().Enable();
-        new ItemViewPatch().Enable();
-        new GetPrioritizedContainersPackNStrapPatch().Enable();
+
+        if (_packNStrapInstalled)
+        {
+            new GetPrioritizedContainersPatch().Disable();
+            new GetPrioritizedContainersPackNStrapPatch().Enable();
+        }
+        else
+        {
+            new GetPrioritizedContainersPackNStrapPatch().Disable();
+            new GetPrioritizedContainersPatch().Enable();
+        }
     }
 
     private void ConfigureEquipmentSlotOrder()
