@@ -3,7 +3,6 @@ using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 
 // BepInEx preloader patcher contract: TargetDLLs + Patch(AssemblyDefinition) run against the
