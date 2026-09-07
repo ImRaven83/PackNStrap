@@ -13,6 +13,7 @@ using Path = System.IO.Path;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Helpers.Server;
+using WTTServerCommonLib.Helpers;
 
 namespace WTTPackNStrap;
 
@@ -41,7 +42,8 @@ public class WTTPackNStrap(
     ModHelper modHelper,
     TemplateTable templateTable,
     LostOnDeathConfig lostOnDeathConfig,
-    TradersTable tradersTable) : IOnLoad
+    TradersTable tradersTable,
+    SlotHelper slotHelper) : IOnLoad
 {
     private Assembly _assembly;
     private Dictionary<MongoId, TemplateItem> _itemsDb;
@@ -51,12 +53,28 @@ public class WTTPackNStrap(
         _assembly = Assembly.GetExecutingAssembly();
         _itemsDb = templateTable.Items;
 
+        CreateBeltSlot();
+
         await wttCommon.CustomItemParentService.CreateCustomParents(_assembly);
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(_assembly);
         wttCommon.CustomRigLayoutService.CreateRigLayouts(_assembly);
         await wttCommon.CustomLocaleService.CreateCustomLocales(_assembly);
 
         ApplyConfigSettings();
+    }
+
+    // "addtoInventorySlots"/"inventorySlots": ["Belt"] on our items only adds them to a
+    // slot that already exists on the Equipment template - it never creates one. So the
+    // independent "Belt" slot itself has to be created here, before CreateCustomParents/
+    // CreateCustomItems run and try to register belts into it.
+    private void CreateBeltSlot()
+    {
+        if (!_itemsDb.TryGetValue("55d7217a4bdc2d86028b456d", out var equipment))
+        {
+            return;
+        }
+
+        slotHelper.EnsureSlot(equipment, "Belt", new MongoId());
     }
 
     private void ApplyConfigSettings()
