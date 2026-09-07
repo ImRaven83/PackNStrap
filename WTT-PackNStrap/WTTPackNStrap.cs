@@ -97,9 +97,9 @@ public class WTTPackNStrap(
             new HandleInsuredItemLostEventPatch().Enable();
             foreach (var caseId in BeltIds.Items)
             {
-                if (_itemsDb.TryGetValue(caseId, out var item))
+                if (_itemsDb.TryGetValue(caseId, out var item) && item.Properties != null)
                 {
-                    item.Properties?.InsuranceDisabled = true;
+                    item.Properties.InsuranceDisabled = true;
                 }
             }
         }
