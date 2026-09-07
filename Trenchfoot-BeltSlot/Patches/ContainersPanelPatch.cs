@@ -31,7 +31,7 @@ namespace BeltSlot.Patches
         {
             try
             {
-                if (Plugin.Instance.enableLogging)
+                if (Plugin.Instance.EnableLogging)
                 {
                     Plugin.Instance.Log.LogInfo($"[Belt Slots] ContainersPanelPatch.PreFix called");
                 }
@@ -43,7 +43,7 @@ namespace BeltSlot.Patches
                     {
                         __result = UnityEngine.Object.Instantiate<SlotView>(template);
 
-                        if (Plugin.Instance.enableLogging)
+                        if (Plugin.Instance.EnableLogging)
                         {
                             Plugin.Instance.Log.LogInfo($"[Belt Slots] default template for armband");
                         }
@@ -94,7 +94,7 @@ namespace BeltSlot.Patches
                 slotView.gameObject.SetActive(true);
                 Plugin.UiMappings.setBeltSlot_Settings(slotView.gameObject);
 
-                if (Plugin.Instance.enableLogging)
+                if (Plugin.Instance.EnableLogging)
                 {
                     Plugin.Instance.Log.LogInfo($"[Belt Slots] Bound Belt UI to independent Belt slot.");
                 }

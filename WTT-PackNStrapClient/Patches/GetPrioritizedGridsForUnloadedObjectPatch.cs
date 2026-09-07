@@ -20,7 +20,6 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
     [PatchPrefix]
     public static bool PatchPrefix(ref InventoryEquipment equipment, bool backpackIncluded, ref IEnumerable<Grid> __result)
     {
-        // Retrieve slots
         Slot tacticalVestSlot = equipment.GetSlot(EquipmentSlot.TacticalVest);
         Slot pocketsSlot = equipment.GetSlot(EquipmentSlot.Pockets);
         Slot backpackSlot = equipment.GetSlot(EquipmentSlot.Backpack);
@@ -38,7 +37,6 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
         Grid[] backpackGrids = backpackItem?.Grids ?? Array.Empty<Grid>();
         Grid[] beltGrids = beltItem?.Grids ?? Array.Empty<Grid>();
 
-        // Find all instances of magDumpPouch
         List<CustomContainerItemClass> magDumpPouches = Common.GetMagDumpPouches(equipment, backpackIncluded);
 
         // Retrieve grids for all found magDumpPouches that can accept items
@@ -52,13 +50,12 @@ internal class GetPrioritizedGridsForUnloadedObjectPatch : ModulePatch
 #if DEBUG
             Console.WriteLine("Returning only MagDumpPouch grids that can accept items.");
 #endif
-            __result = magDumpPouchGrids; // Return only MagDumpPouch grids if valid
+            __result = magDumpPouchGrids;
             return false;
         }
 #if DEBUG
         Console.WriteLine("No valid MagDumpPouch grids found.");
 #endif
-        // Fall back to returning other grids if no valid MagDumpPouch grids
         __result = backpackIncluded
             ? tacticalVestGrids.Concat(pocketsGrids).Concat(backpackGrids).Concat(beltGrids)
             : tacticalVestGrids.Concat(pocketsGrids).Concat(beltGrids);

@@ -8,7 +8,7 @@ namespace BeltSlot.Helpers
         // Set the settings of the belt slot, such as its name
         public void setBeltSlot_Settings(GameObject targetBelt)
         {
-            if(Plugin.Instance.enableLogging)
+            if(Plugin.Instance.EnableLogging)
             {
                 Plugin.Instance.Log.LogInfo($"[Belt Slots] setBeltSlot_Settings called for {targetBelt.name}");
             }

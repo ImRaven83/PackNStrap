@@ -10,13 +10,16 @@ using System.Reflection;
 
 namespace BeltSlot
 {
-    [BepInPlugin("com.trenchfoot.beltslot", "Trenchfoot-BeltSlot", "2.0.7")]
+    [BepInPlugin(
+        PluginConstants.Guid,
+        PluginConstants.Name,
+        PluginConstants.Version)]
     [BepInDependency("com.SPT.core", "4.0.4")]
     [BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         #region Variables
-        public bool enableLogging = false;
+        public bool EnableLogging = false;
         public bool packNStrapInstalled;
         internal static Plugin Instance { get; set; }
         internal ManualLogSource Log { get; set; }
