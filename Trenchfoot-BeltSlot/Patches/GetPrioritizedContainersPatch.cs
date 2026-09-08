@@ -48,10 +48,21 @@ namespace BeltSlot.Patches
                 ?.Containers
                 ?? Enumerable.Empty<IContainer>();
 
-            if (item is Ammo or Magazine)
+            if (item is Magazine)
             {
                 __result = vestContainers
                     .Concat(tacticalBeltContainers)
+                    .Concat(pocketContainers)
+                    .Concat(backpackContainers)
+                    .Concat(secureContainerContainers);
+
+                return false;
+            }
+
+            if (item is Ammo)
+            {
+                __result = tacticalBeltContainers
+                    .Concat(vestContainers)
                     .Concat(pocketContainers)
                     .Concat(backpackContainers)
                     .Concat(secureContainerContainers);

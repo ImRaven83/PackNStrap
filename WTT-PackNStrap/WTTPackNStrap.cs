@@ -13,7 +13,6 @@ using Path = System.IO.Path;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Helpers.Server;
-using WTTServerCommonLib.Helpers;
 
 namespace WTTPackNStrap;
 
@@ -42,8 +41,7 @@ public class WTTPackNStrap(
     ModHelper modHelper,
     TemplateTable templateTable,
     LostOnDeathConfig lostOnDeathConfig,
-    TradersTable tradersTable,
-    SlotHelper slotHelper) : IOnLoad
+    TradersTable tradersTable) : IOnLoad
 {
     private Assembly _assembly;
     private Dictionary<MongoId, TemplateItem> _itemsDb;
@@ -53,28 +51,80 @@ public class WTTPackNStrap(
         _assembly = Assembly.GetExecutingAssembly();
         _itemsDb = templateTable.Items;
 
-        CreateBeltSlot();
+        EnsureBeltSlot();
 
         await wttCommon.CustomItemParentService.CreateCustomParents(_assembly);
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(_assembly);
         wttCommon.CustomRigLayoutService.CreateRigLayouts(_assembly);
         await wttCommon.CustomLocaleService.CreateCustomLocales(_assembly);
 
+        PreventBeltsFromBeingNested();
         ApplyConfigSettings();
     }
 
-    // "addtoInventorySlots"/"inventorySlots": ["Belt"] on our items only adds them to a
-    // slot that already exists on the Equipment template - it never creates one. So the
-    // independent "Belt" slot itself has to be created here, before CreateCustomParents/
-    // CreateCustomItems run and try to register belts into it.
-    private void CreateBeltSlot()
+    // Belts can't be stashed inside another belt's own pouches.
+    private void PreventBeltsFromBeingNested()
     {
-        if (!_itemsDb.TryGetValue("55d7217a4bdc2d86028b456d", out var equipment))
+        var beltIds = BeltIds.Items.Select(id => (MongoId)id).ToHashSet();
+
+        foreach (var caseId in BeltIds.Items)
+        {
+            if (!_itemsDb.TryGetValue(caseId, out var item))
+            {
+                continue;
+            }
+
+            foreach (var grid in item.Properties?.Grids ?? [])
+            {
+                foreach (var filter in grid.Properties?.Filters ?? [])
+                {
+                    filter.ExcludedFilter ??= [];
+                    foreach (var beltId in beltIds)
+                    {
+                        filter.ExcludedFilter.Add(beltId);
+                    }
+                }
+            }
+        }
+    }
+
+    // Adds a genuine "Belt" slot to the player's inventory root, cloned from the vanilla
+    // ArmBand slot definition, so belts no longer compete with armbands for the same slot.
+    // "addtoInventorySlots"/"inventorySlots": ["Belt"] on our items only adds them to a
+    // slot that already exists on the Equipment template - it never creates one, so the
+    // slot itself has to be created here before CreateCustomParents/CreateCustomItems run.
+    private void EnsureBeltSlot()
+    {
+        if (!_itemsDb.TryGetValue("55d7217a4bdc2d86028b456d", out var defaultInventory) || defaultInventory.Properties == null)
         {
             return;
         }
 
-        slotHelper.EnsureSlot(equipment, "Belt", new MongoId());
+        var slots = defaultInventory.Properties.Slots?.ToList() ?? [];
+        if (slots.Any(slot => slot.Name == "Belt"))
+        {
+            return;
+        }
+
+        var armBandSlot = slots.FirstOrDefault(slot => slot.Name == "ArmBand");
+        var beltSlot = new Slot
+        {
+            Name = "Belt",
+            Id = "6815465859b8c6ff13f94027",
+            Parent = armBandSlot?.Parent ?? "55d7217a4bdc2d86028b456d",
+            Required = false,
+            MaxCount = armBandSlot?.MaxCount ?? 1.0,
+            MergeSlotWithChildren = armBandSlot?.MergeSlotWithChildren,
+            Prototype = armBandSlot?.Prototype,
+            Properties = new SlotProperties
+            {
+                MaxStackCount = armBandSlot?.Properties?.MaxStackCount ?? 1.0,
+                Filters = [new SlotFilter { Filter = [(MongoId)"6815465859b8c6ff13f94026"] }]
+            }
+        };
+
+        slots.Add(beltSlot);
+        defaultInventory.Properties.Slots = slots;
     }
 
     private void ApplyConfigSettings()

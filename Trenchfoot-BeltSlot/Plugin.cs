@@ -1,372 +1,74 @@
-﻿using BeltSlot.Helpers;
+using BeltSlot.Helpers;
 using BeltSlot.Patches;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using Comfort.Common;
-using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using EFT.UI.Screens;
-using PackNStrap.Core.Items;
-using System;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
-namespace BeltSlot;
-
-[BepInPlugin(
-    PluginConstants.Guid,
-    PluginConstants.Name,
-    PluginConstants.Version)]
-[BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
-public sealed class Plugin : BaseUnityPlugin
+namespace BeltSlot
 {
-    private static readonly EquipmentSlot[] SlotsAbovePockets =
+    [BepInPlugin(
+        PluginConstants.Guid,
+        PluginConstants.Name,
+        PluginConstants.Version)]
+    [BepInDependency("com.SPT.core", "4.0.4")]
+    [BepInDependency("com.wtt.packnstrap", BepInDependency.DependencyFlags.SoftDependency)]
+    public class Plugin : BaseUnityPlugin
     {
-        EquipmentSlot.TacticalVest,
-        EquipmentSlot.ArmBand,
-        EquipmentSlot.Pockets,
-        EquipmentSlot.Backpack,
-        EquipmentSlot.SecuredContainer,
-        EquipmentSlot.Dogtag
-    };
+        #region Variables
+        public bool EnableLogging = false;
+        public bool packNStrapInstalled;
+        internal static Plugin Instance { get; set; }
+        internal ManualLogSource Log { get; set; }
+        private static UI_Mappings uiMappings;
+        internal static UI_Mappings UiMappings { get => uiMappings; set => uiMappings = value; }
+        #endregion
 
-    private static readonly EquipmentSlot[] SlotsBelowPockets =
-    {
-        EquipmentSlot.TacticalVest,
-        EquipmentSlot.Pockets,
-        EquipmentSlot.ArmBand,
-        EquipmentSlot.Backpack,
-        EquipmentSlot.SecuredContainer,
-        EquipmentSlot.Dogtag
-    };
-
-    internal static Plugin Instance { get; private set; } = null!;
-    internal static UI_Mappings UiMappings { get; private set; } = null!;
-    internal ManualLogSource Log { get; private set; } = null!;
-
-    public bool EnableLogging { get; set; }
-    public bool IconToggle { get; set; } = true;
-
-    public bool InventoryScreenLoaded { get; set; }
-    public bool ComplexStashPanelLoaded { get; set; }
-    public bool IsScav { get; set; }
-
-    public Slot? PlayerArmbandSlot { get; private set; }
-    public Slot? LootArmbandSlot { get; private set; }
-
-    public InventoryEquipment InventoryEquipment;
-    public InventoryScreen InventoryScreen;
-
-    private string? _playerArmbandItemId;
-    private string? _lootArmbandItemId;
-    private string? _scavTransferArmbandItemId;
-
-    private bool _packNStrapInstalled;
-
-    private void Awake()
-    {
-        Instance = this;
-        Log = Logger;
-
-        _packNStrapInstalled = Chainloader.PluginInfos.ContainsKey("com.wtt.packnstrap");
-
-        Settings.Init(Config);
-        UiMappings = new UI_Mappings();
-        ConfigureEquipmentSlotOrder();
-        EnablePatches();
-    }
-
-    private void EnablePatches()
-    {
-        new ContainersPanelPatch().Enable();
-        new ContainersPanelPatch2().Enable();
-
-        if (_packNStrapInstalled)
+        #region Belt Settings
+        private static EquipmentSlot[] belowEquipmentSlots = new[]
         {
-            new GetPrioritizedContainersPatch().Disable();
-            new GetPrioritizedContainersPackNStrapPatch().Enable();
-        }
-        else
-        {
-            new GetPrioritizedContainersPackNStrapPatch().Disable();
-            new GetPrioritizedContainersPatch().Enable();
-        }
-    }
-
-    private void ConfigureEquipmentSlotOrder()
-    {
-        var slots = Settings.BeltSlotLocation.Value switch
-        {
-            BeltSlotLocationOption.AbovePockets => SlotsAbovePockets,
-            BeltSlotLocationOption.BelowPockets => SlotsBelowPockets,
-            _ => SlotsAbovePockets
+            EquipmentSlot.TacticalVest,
+            EquipmentSlot.Pockets,
+            EquipmentSlot.ArmBand,
+            EquipmentSlot.Backpack,
+            EquipmentSlot.SecuredContainer,
+            EquipmentSlot.Dogtag
         };
 
-        var field = typeof(ContainersPanel).GetField(
-            "_slotNames",
-            BindingFlags.Static | BindingFlags.NonPublic);
-
-        if (field == null)
+        void SetEquipmentSlots()
         {
-            Log.LogError("Could not find ContainersPanel._slotNames. Belt slot ordering was not applied.");
-            return;
+            // Belt now lives in its own independent slot, so it always renders below Pockets.
+            typeof(ContainersPanel)
+                .GetField("_slotNames", BindingFlags.Static | BindingFlags.NonPublic)
+                .SetValue(null, belowEquipmentSlots);
         }
+        #endregion
 
-        field.SetValue(null, slots);
-    }
-
-    public void UpdatePlayerArmBandSlot()
-    {
-        if (!IsGameReady() || IsScav || !IsInventoryScreenOpen() || PlayerArmbandSlot == null)
+        private void Awake()
         {
-            return;
-        }
+            packNStrapInstalled = Chainloader.PluginInfos.Keys.Contains("com.wtt.packnstrap");
+            Instance = this;
+            Log = Logger;
+            UiMappings = new UI_Mappings();
 
-        RefreshIfChanged(
-            PlayerArmbandSlot,
-            UiMappings.armBandSlot,
-            UiMappings.beltSlot,
-            ref _playerArmbandItemId);
-    }
+            SetEquipmentSlots();
+            new ContainersPanelPatch().Enable();
+            new ContainersPanelPatch2().Enable();
 
-    public void UpdateLootArmBandSlot()
-    {
-        if (!IsGameReady()
-            || !InGameStatus.InRaid
-            || !ComplexStashPanelLoaded
-            || !IsInventoryScreenOpen()
-            || LootArmbandSlot == null)
-        {
-            return;
-        }
-
-        RefreshIfChanged(
-            LootArmbandSlot,
-            UiMappings.lootArmBand,
-            UiMappings.lootBeltSlot,
-            ref _lootArmbandItemId);
-    }
-
-    public void UpdateScavInventoryArmbandSlot()
-    {
-        if (IsScav || !IsGameReady() || !IsScavengerTransferScreenOpen())
-        {
-            return;
-        }
-
-        var slot = UiMappings.getScavLootTransferUI_Mappings();
-        if (slot == null)
-        {
-            IsScav = true;
-            return;
-        }
-
-        RefreshIfChanged(
-            slot,
-            UiMappings.scavArmBandSlot,
-            UiMappings.scavBeltSlot,
-            ref _scavTransferArmbandItemId);
-    }
-
-    public void SetPlayerArmbandSlotOnOpen()
-    {
-        if (IsScav || !IsInventoryScreenOpen())
-        {
-            return;
-        }
-
-        var slot = UiMappings.getInventoryContainer_Mappings();
-        if (slot == null)
-        {
-            IsScav = true;
-            return;
-        }
-
-        PlayerArmbandSlot = slot;
-        RefreshAndTrack(slot, UiMappings.armBandSlot, UiMappings.beltSlot, ref _playerArmbandItemId);
-    }
-
-    public void SetLootArmbandSlotOnOpen()
-    {
-        if (!IsInventoryScreenOpen() || !ComplexStashPanelLoaded)
-        {
-            return;
-        }
-
-        var slot = UiMappings.getComplexLootUI_Mappings();
-        if (slot == null)
-        {
-            ComplexStashPanelLoaded = false;
-            return;
-        }
-
-        LootArmbandSlot = slot;
-        RefreshAndTrack(slot, UiMappings.lootArmBand, UiMappings.lootBeltSlot, ref _lootArmbandItemId);
-    }
-
-    public void SetInsuranceArmbandSlot()
-    {
-        RefreshStaticScreen(
-            UiMappings.getInsuranceScreen_Mappings(),
-            UiMappings.insuranceArmBand,
-            UiMappings.insuranceBelt);
-    }
-
-    public void SetBuildsArmbandSlot()
-    {
-        RefreshStaticScreen(
-            UiMappings.getBuildPanel_Mappings(),
-            UiMappings.buildArmbandSlot,
-            UiMappings.buildBeltSlot);
-    }
-
-    public void SetDeployArmbandSlot()
-    {
-        if (IsScav)
-        {
-            return;
-        }
-
-        var slot = UiMappings.getDeployPanel_Mappings();
-        if (slot == null)
-        {
-            IsScav = true;
-            return;
-        }
-
-        RefreshStaticScreen(slot, UiMappings.deployArmbandSlot, UiMappings.deployBeltSlot);
-    }
-
-    private void RefreshStaticScreen(Slot? slot, GameObject armbandUi, GameObject beltUi)
-    {
-        if (!TryGetContainedItem(slot, out _))
-        {
-            return;
-        }
-
-        RefreshBeltSlot(slot!, armbandUi, beltUi);
-    }
-
-    private void RefreshAndTrack(
-        Slot slot,
-        GameObject armbandUi,
-        GameObject beltUi,
-        ref string? trackedItemId)
-    {
-        if (!TryGetContainedItem(slot, out var item))
-        {
-            trackedItemId = null;
-            RefreshEmptySlot(armbandUi, beltUi);
-            return;
-        }
-
-        RefreshBeltSlot(slot, armbandUi, beltUi);
-        trackedItemId = item.Id;
-    }
-
-    private void RefreshIfChanged(
-        Slot slot,
-        GameObject armbandUi,
-        GameObject beltUi,
-        ref string? trackedItemId)
-    {
-        if (!TryGetContainedItem(slot, out var item))
-        {
-            if (trackedItemId != null)
+            // Enables the correct patch based on if PackNStrap is installed or not
+            if (packNStrapInstalled)
             {
-                trackedItemId = null;
-                DebugLog("Armband slot was emptied.");
+                new GetPrioritizedContainersPatch().Disable();
+                new GetPrioritizedContainersPackNStrapPatch().Enable();
             }
-
-            RefreshEmptySlot(armbandUi, beltUi);
-            return;
-        }
-
-        // Reapply every ItemView.Update in case EFT rebuilds/resets the SlotView state.
-        RefreshBeltSlot(slot, armbandUi, beltUi);
-
-        if (trackedItemId == item.Id)
-        {
-            return;
-        }
-
-        trackedItemId = item.Id;
-        DebugLog($"Armband item changed: {item.Id}; IsContainer={item.IsContainer}");
-    }
-
-    private void RefreshBeltSlot(Slot slot, GameObject targetArmband, GameObject targetBelt)
-    {
-        var item = slot.ContainedItem;
-        var isBelt = item != null && (item.IsContainer || item is CustomBeltItemClass);
-
-        // true = empty/hidden-item visual
-        // false = full/shown-item visual
-
-        if (isBelt)
-        {
-            // Container in armband slot: display it as the belt.
-            UiMappings.toggleArmBandSlotFull(showEmptyState: true, targetArmband);
-            UiMappings.toggleBeltSlotFull(showEmptyState: false, targetBelt);
-            return;
-        }
-
-        // Normal non-container armband: display it as the armband.
-        UiMappings.toggleArmBandSlotFull(showEmptyState: false, targetArmband);
-        UiMappings.toggleBeltSlotFull(showEmptyState: true, targetBelt);
-    }
-    private void RefreshEmptySlot(GameObject targetArmband, GameObject targetBelt)
-    {
-        // No item in either representation.
-        UiMappings.toggleArmBandSlotFull(showEmptyState: true, targetArmband);
-        UiMappings.toggleBeltSlotFull(showEmptyState: true, targetBelt);
-    }
-    private bool IsGameReady()
-    {
-        return Singleton<CommonUI>.Instantiated
-            && Singleton<PreloaderUI>.Instantiated
-            && InventoryScreenLoaded;
-    }
-
-    private static bool IsInventoryScreenOpen()
-    {
-        return Singleton<CommonUI>.Instantiated
-            && Singleton<CommonUI>.Instance.InventoryScreen.isActiveAndEnabled;
-    }
-
-    private static bool IsScavengerTransferScreenOpen()
-    {
-        if (!Singleton<CommonUI>.Instantiated)
-        {
-            return false;
-        }
-
-        var screen = Singleton<CommonUI>.Instance.ScavengerInventoryScreen;
-        return screen.isActiveAndEnabled
-            && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "EmptyScene"
-            && EftScreenManager.Instance.CurrentScreenController.ScreenType == EEftScreenType.ScavInventory;
-    }
-
-    private static bool TryGetContainedItem(Slot? slot, out Item item)
-    {
-        item = null!;
-
-        if (slot == null || slot.Items.IsNullOrEmpty() || slot.ContainedItem == null)
-        {
-            return false;
-        }
-
-        item = slot.ContainedItem;
-        return true;
-    }
-
-    private void DebugLog(string message)
-    {
-        if (EnableLogging)
-        {
-            Log.LogInfo(message);
+            else
+            {
+                new GetPrioritizedContainersPackNStrapPatch().Disable();
+                new GetPrioritizedContainersPatch().Enable();
+            }
         }
     }
 }
