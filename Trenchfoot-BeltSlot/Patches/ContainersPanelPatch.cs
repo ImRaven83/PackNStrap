@@ -78,6 +78,7 @@ namespace BeltSlot.Patches
                 var beltSlot = BeltSlotLookup.GetBeltSlot(equipment);
                 if (beltSlot == null)
                 {
+                    Plugin.Instance.Log.LogWarning($"[Belt Slots] No 'Belt' slot found on this equipment's slot list. Is WTT-PackNStrapServer installed and up to date?");
                     return;
                 }
 
@@ -94,10 +95,7 @@ namespace BeltSlot.Patches
                 slotView.gameObject.SetActive(true);
                 Plugin.UiMappings.setBeltSlot_Settings(slotView.gameObject);
 
-                if (Plugin.Instance.EnableLogging)
-                {
-                    Plugin.Instance.Log.LogInfo($"[Belt Slots] Bound Belt UI to independent Belt slot.");
-                }
+                Plugin.Instance.Log.LogInfo($"[Belt Slots] Bound Belt UI to independent Belt slot.");
             }
             catch (Exception ex)
             {
