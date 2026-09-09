@@ -1,5 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using HarmonyLib;
+using PackNStrap.Helpers;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,21 +26,20 @@ internal class GetThrowablePriorityGrenadesListPatch : ModulePatch
         if (inventoryController?.Inventory?.Equipment == null || __result == null)
             return;
 
-        if (inventoryController.Inventory.Equipment
-                .GetSlot(EquipmentSlot.ArmBand)
-                .ContainedItem is not CompoundItem armBand)
+        if (BeltSlotHelper.GetBeltSlot(inventoryController.Inventory.Equipment)
+                ?.ContainedItem is not CompoundItem belt)
         {
             return;
         }
 
-        var containers = new List<CompoundItem> { armBand };
+        var containers = new List<CompoundItem> { belt };
 
-        var armBandGrenades = containers
+        var beltGrenades = containers
             .GetTopLevelItems()
             .OfType<ThrowWeap>()
             .Where(inventoryController.Examined);
 
-        __result.AddRange(armBandGrenades);
+        __result.AddRange(beltGrenades);
         __result.Sort(InventoryExtension.CG_Class2411.CG_Class2411.method_3);
     }
 }

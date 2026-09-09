@@ -1,7 +1,5 @@
-﻿using BeltSlot.Helpers;
 using EFT.InventoryLogic;
 using HarmonyLib;
-using PackNStrap.Core.Items;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +7,8 @@ using System.Reflection;
 
 namespace BeltSlot.Patches
 {
-    // Creates the prioritized destination list used by loot/inventory actions.
-    public class GetPrioritizedContainersPackNStrapPatch : ModulePatch
+    // Fallback used when PackNStrap (and its CustomBeltItemClass) is not installed.
+    public class GetPrioritizedContainersPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -45,23 +43,26 @@ namespace BeltSlot.Patches
                 ?.Containers
                 ?? Enumerable.Empty<IContainer>();
 
-            Slot beltSlot = BeltSlotLookup.GetBeltSlot(equipment);
-
-            IEnumerable<IContainer> customBeltContainers =
-                (beltSlot?.ContainedItem as CustomBeltItemClass)
-                ?.Containers
-                ?? Enumerable.Empty<IContainer>();
-
             IEnumerable<IContainer> tacticalBeltContainers =
-                (beltSlot?.ContainedItem as Vest)
+                (equipment.GetSlot(EquipmentSlot.ArmBand)?.ContainedItem as Vest)
                 ?.Containers
                 ?? Enumerable.Empty<IContainer>();
 
-            if (item is Ammo or Magazine)
+            if (item is Magazine)
             {
                 __result = vestContainers
-                    .Concat(customBeltContainers)
                     .Concat(tacticalBeltContainers)
+                    .Concat(pocketContainers)
+                    .Concat(backpackContainers)
+                    .Concat(secureContainerContainers);
+
+                return false;
+            }
+
+            if (item is Ammo)
+            {
+                __result = tacticalBeltContainers
+                    .Concat(vestContainers)
                     .Concat(pocketContainers)
                     .Concat(backpackContainers)
                     .Concat(secureContainerContainers);
@@ -74,7 +75,6 @@ namespace BeltSlot.Patches
                 __result = secureContainerContainers
                     .Concat(backpackContainers)
                     .Concat(vestContainers)
-                    .Concat(customBeltContainers)
                     .Concat(tacticalBeltContainers)
                     .Concat(pocketContainers);
 
@@ -85,7 +85,6 @@ namespace BeltSlot.Patches
             {
                 __result = pocketContainers
                     .Concat(vestContainers)
-                    .Concat(customBeltContainers)
                     .Concat(tacticalBeltContainers)
                     .Concat(backpackContainers)
                     .Concat(secureContainerContainers);
@@ -95,7 +94,6 @@ namespace BeltSlot.Patches
 
             __result = backpackContainers
                 .Concat(vestContainers)
-                .Concat(customBeltContainers)
                 .Concat(tacticalBeltContainers)
                 .Concat(pocketContainers)
                 .Concat(secureContainerContainers);

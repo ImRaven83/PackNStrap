@@ -17,7 +17,7 @@ namespace PackNStrap.Patches
 
         public static void PatchPostfix(Slot __instance, ref EParentMergeType __result)
         {
-            if (__instance?.ID == "ArmBand")
+            if (__instance?.ID == "Belt")
             {
                 __result = EParentMergeType.InheritFromItem;
             }

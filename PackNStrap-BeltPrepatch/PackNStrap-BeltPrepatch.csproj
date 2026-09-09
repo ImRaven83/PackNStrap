@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>zzzz-PackNStrap-BeltPrepatch</AssemblyName>
+        <Description>Preload-time IL patch that teaches Assembly-CSharp's EquipmentSlot string-parsing call sites about the independent "Belt" slot, since EquipmentSlot has no such enum member natively.</Description>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <Configurations>Debug;Release;UNITY_EDITOR</Configurations>
+        <RootNamespace></RootNamespace>
+        <PackageId>PackNStrap-BeltPrepatch</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="Mono.Cecil">
+            <HintPath>..\..\..\BepInEx\core\Mono.Cecil.dll</HintPath>
+        </Reference>
+        <Reference Include="Mono.Cecil.Rocks">
+            <HintPath>..\..\..\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="@echo off&#xA;setlocal enabledelayedexpansion&#xA;&#xA;set DLLPATH=$(TargetDir)$(TargetName).dll&#xA;set OUTDIR=..\..\..\BepInEx\patchers&#xA;set BUILDOUTDIR=..\Build\BepInEx\patchers&#xA;&#xA;if not exist &quot;%OUTDIR%&quot; mkdir &quot;%OUTDIR%&quot;&#xA;if not exist &quot;%BUILDOUTDIR%&quot; mkdir &quot;%BUILDOUTDIR%&quot;&#xA;&#xA;copy /Y &quot;%DLLPATH%&quot; &quot;%OUTDIR%\&quot; &gt;nul 2&gt;&amp;1&#xA;echo [PostBuild] Copied %TargetName%.dll to %OUTDIR%&#xA;&#xA;copy /Y &quot;%DLLPATH%&quot; &quot;%BUILDOUTDIR%\&quot; &gt;nul 2&gt;&amp;1&#xA;echo [PostBuild] Copied %TargetName%.dll to %BUILDOUTDIR%&#xA;endlocal&#xA;" />
+    </Target>
+
+</Project>

@@ -1,9 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using PackNStrap.Helpers;
 using SPT.Reflection.Patching;
 
 namespace PackNStrap.Patches
@@ -18,10 +18,14 @@ namespace PackNStrap.Patches
         [PatchPostfix]
         public static void PatchPostfix(InventoryEquipment __instance, ref IReadOnlyList<Slot> __result)
         {
-            List<Slot> newResult = __result.ToList();
-            var armbandSlot = __instance.GetSlot(EquipmentSlot.ArmBand);
-            newResult.Add(armbandSlot);
+            var beltSlot = BeltSlotHelper.GetBeltSlot(__instance);
+            if (beltSlot == null)
+            {
+                return;
+            }
 
+            List<Slot> newResult = __result.ToList();
+            newResult.Add(beltSlot);
             __result = newResult;
         }
     }
@@ -36,8 +40,14 @@ namespace PackNStrap.Patches
         [PatchPostfix]
         public static void PatchPostfix(InventoryEquipment __instance, ref IReadOnlyList<Slot> __result)
         {
+            var beltSlot = BeltSlotHelper.GetBeltSlot(__instance);
+            if (beltSlot == null)
+            {
+                return;
+            }
+
             List<Slot> newResult = __result.ToList();
-            newResult.Add(__instance.GetSlot(EquipmentSlot.ArmBand));
+            newResult.Add(beltSlot);
             __result = newResult;
         }
     }
@@ -55,8 +65,14 @@ namespace PackNStrap.Patches
 
         public static void PatchPostfix(InventoryEquipment __instance, ref IReadOnlyList<Slot> __result)
         {
+            var beltSlot = BeltSlotHelper.GetBeltSlot(__instance);
+            if (beltSlot == null)
+            {
+                return;
+            }
+
             List<Slot> newResult = __result.ToList();
-            newResult.Add(__instance.GetSlot(EquipmentSlot.ArmBand));
+            newResult.Add(beltSlot);
             __result = newResult;
         }
     }

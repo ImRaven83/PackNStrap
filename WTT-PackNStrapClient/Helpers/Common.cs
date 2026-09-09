@@ -17,26 +17,38 @@ public abstract class Common
 
         foreach (var slotId in PackNStrap.NewBindAvailableSlots)
         {
-            var root = equipment.GetSlot(slotId)?.ContainedItem;
-            if (root == null)
+            if (IsItemReachableFromSlotRoot(equipment.GetSlot(slotId)?.ContainedItem, item))
+                return true;
+        }
+
+        // Belt isn't a real EquipmentSlot, so it can't live in NewBindAvailableSlots -
+        // check it the same way as every other bind-available slot.
+        if (IsItemReachableFromSlotRoot(BeltSlotHelper.GetBeltSlot(equipment)?.ContainedItem, item))
+            return true;
+
+        return false;
+    }
+
+    private static bool IsItemReachableFromSlotRoot(Item root, Item item)
+    {
+        if (root == null)
+            return false;
+
+        if (root == item)
+            return true;
+
+        var rootItems = GetTopLevelItems(root as CompoundItem);
+
+        if (rootItems.Contains(item))
+            return true;
+
+        foreach (var child in rootItems.OfType<CompoundItem>())
+        {
+            if (child is Vest || child is Backpack || child is CustomBeltItemClass)
                 continue;
 
-            if (root == item)
+            if (GetTopLevelItems(child).Contains(item))
                 return true;
-
-            var rootItems = GetTopLevelItems(root as CompoundItem);
-
-            if (rootItems.Contains(item))
-                return true;
-
-            foreach (var child in rootItems.OfType<CompoundItem>())
-            {
-                if (child is Vest || child is Backpack || child is CustomBeltItemClass)
-                    continue;
-
-                if (GetTopLevelItems(child).Contains(item))
-                    return true;
-            }
         }
 
         return false;
@@ -75,13 +87,13 @@ public abstract class Common
         Slot tacticalVestSlot = equipment.GetSlot(EquipmentSlot.TacticalVest);
         Slot pocketsSlot = equipment.GetSlot(EquipmentSlot.Pockets);
         Slot backpackSlot = equipment.GetSlot(EquipmentSlot.Backpack);
-        Slot armbandSlot = equipment.GetSlot(EquipmentSlot.ArmBand);
+        Slot beltSlot = BeltSlotHelper.GetBeltSlot(equipment);
 
         FindMagDumpPouchInItem(tacticalVestSlot?.ContainedItem as Vest);
         FindMagDumpPouchInItem(pocketsSlot?.ContainedItem as Pockets);
         if (backpackIncluded)
             FindMagDumpPouchInItem(backpackSlot?.ContainedItem as Backpack);
-        FindMagDumpPouchInItem(armbandSlot?.ContainedItem as CustomBeltItemClass);
+        FindMagDumpPouchInItem(beltSlot?.ContainedItem as CustomBeltItemClass);
 
         return magDumpPouches;
     }
